@@ -1,18 +1,20 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Creox AgentMesh — Mission Control</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#04070f;color:#dbeafe}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#020617;color:#dbeafe}
 a{color:#22d3ee}
-.top{display:flex;gap:18px;align-items:center;padding:12px 20px;background:#08111e;border-bottom:1px solid #22d3ee;flex-wrap:wrap}
-.brand{font-size:18px;font-weight:800;letter-spacing:2px}.brand span{color:#22d3ee}.brand small{display:block;font-size:11px;letter-spacing:3px;color:#94a3b8}
-.stat{border-left:2px solid #164e63;padding-left:10px}.stat b{font-size:20px;display:block}.stat span{font-size:11px;letter-spacing:1px;color:#94a3b8}
+.top{display:flex;gap:16px;align-items:center;padding:10px 18px;background:#071426;border-bottom:1px solid #164e63;flex-wrap:wrap}
+.brand{font-size:18px;font-weight:800;letter-spacing:1px}.brand span{color:#22d3ee}.brand small{display:block;font-size:10px;letter-spacing:3px;color:#94a3b8}
+.stat{border-left:2px solid #164e63;padding-left:10px}.stat b{font-size:20px;display:block}.stat span{font-size:10px;letter-spacing:1px;color:#94a3b8}.stat i{font-style:normal;font-size:11px;color:#34d399}
 .live{color:#34d399;font-weight:700}
+.search{flex:1;min-width:200px}.search input{width:100%;padding:8px 12px;background:#0a1526;border:1px solid #1e3a5f;border-radius:20px;color:#fff}
 .wrap{display:flex}
-.side{width:190px;min-width:190px;background:#060d1a;border-right:1px solid #1e3a5f;padding:14px}
-.side a{display:block;padding:9px 12px;border-radius:6px;color:#94a3b8;text-decoration:none;margin-bottom:4px}
+.side{width:190px;min-width:190px;background:#040d1d;border-right:1px solid #1e3a5f;padding:12px}
+.side a{display:flex;justify-content:space-between;padding:9px 12px;border-radius:6px;color:#94a3b8;text-decoration:none;margin-bottom:3px}
 .side a.on{background:#0e7490;color:#fff}
+.side a b{color:#fff;font-size:12px}
 .main{flex:1;padding:14px}
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}@media(max-width:1000px){.grid{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:2.2fr 1fr;gap:14px}@media(max-width:1000px){.grid{grid-template-columns:1fr}}
 .panel{background:#0a1526;border:1px solid #1e3a5f;border-radius:10px;padding:16px;margin-bottom:14px}
 .panel h2{margin:0 0 12px;font-size:12px;letter-spacing:2px;color:#7dd3fc;text-transform:uppercase}
 label{font-size:13px;color:#94a3b8}input[type=text],input[type=password],textarea,select{width:100%;padding:9px;margin:6px 0 12px;background:#071426;border:1px solid #1e3a5f;border-radius:6px;color:#fff}
@@ -24,26 +26,46 @@ table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #1e3a5f;
 .node{position:absolute;text-align:center;background:#0f2138;border:1px solid #22d3ee;border-radius:8px;padding:8px 10px;font-size:12px;min-width:110px}
 .bar{height:10px;background:#071426;border-radius:5px;overflow:hidden;margin:4px 0 10px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#34d399)}
 .warn{color:#fbbf24}.ok{color:#34d399}.bad{color:#f43f5e}
+.gauges{display:flex;gap:12px;justify-content:space-around;text-align:center}
+.gauge{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto}
+.gauge b{font-size:16px}.gauge span{font-size:10px;color:#94a3b8}
+.svc{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}@media(max-width:1000px){.svc{grid-template-columns:repeat(3,1fr)}}
+.svc div{background:#0a1526;border:1px solid #1e3a5f;border-radius:8px;padding:12px;font-size:13px}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:#164e63;color:#fff}
+.pill.run{background:#166534}.pill.rev{background:#1e40af}.pill.q{background:#334155}.pill.done{background:#14532d}
 </style></head><body>
-<div class="top"><div class="brand">MISSION <span>CONTROL</span><small>CREOX AGENTMESH — AI AGENT OPERATING CENTER</small></div>
-<div class="stat"><b id="st-agents">—</b><span>AGENTS</span></div>
+<div class="top"><div class="brand">MISSION <span>CONTROL</span><small>AI AGENT OPERATING CENTER</small></div>
+<div class="stat"><b id="st-agents">—</b><span>AGENTS</span><br><i id="st-online-pct"></i></div>
 <div class="stat"><b id="st-online">—</b><span>ONLINE</span></div>
 <div class="stat"><b id="st-active">—</b><span>ACTIVE TASKS</span></div>
-<div class="stat"><b id="st-done">—</b><span>COMPLETED</span></div>
-<div class="stat"><b id="st-msgs">—</b><span>AUDIT MESSAGES</span></div>
-<div style="margin-left:auto"><span class="live">● LIVE</span> &nbsp; <button onclick="loadAll()">Refresh</button> <a href="/docs">API Docs</a></div></div>
+<div class="stat"><b id="st-done">—</b><span>COMPLETED</span><br><i>Today</i></div>
+<div class="stat"><b id="st-msgs">—</b><span>MESSAGES</span><br><i>Audit log</i></div>
+<div class="search"><input type="text" id="q" placeholder="Search agents, tasks, logs..." oninput="filterAll()"></div>
+<div><span class="live">● LIVE</span> &nbsp; <button onclick="loadAll()">Refresh</button> &nbsp; <b>Master Creox</b> <span class="small">Owner</span></div></div>
 <div class="wrap"><div class="side">
-<a class="on" href="#overview">Overview</a><a href="#agents">Agents</a><a href="#tasks">Tasks</a><a href="#comms">Comms Feed</a><a href="#audit">Audit</a>
-<div class="small" style="margin-top:20px">SYSTEM STATUS<br><span class="ok">● All Systems Online</span><br><span id="st-version">Version —</span><br>Local mesh only — never internet-facing.</div>
+<a class="on" href="#overview">Overview</a>
+<a href="#agents">Agents <b id="sb-agents">—</b></a>
+<a href="#tasks">Tasks <b id="sb-tasks">—</b></a>
+<a href="#comms">Comm <b id="sb-comms">—</b></a>
+<a href="#tasks">Kanban <b id="sb-kanban">—</b></a>
+<a href="#tasks">Escalations <b id="sb-esc">—</b></a>
+<a href="#tasks">Incidents <b id="sb-inc">—</b></a>
+<a href="#audit">Activity</a><a href="#overview">State</a><a href="#meshhealth">Metrics</a><a href="#audit">Logs</a>
+<div class="small" style="margin-top:20px">SYSTEM STATUS<br><span class="ok">● All Systems Online</span><br><span id="st-uptime">Uptime —</span><br><span id="st-version">Version —</span><br>Local mesh only — never internet-facing.</div>
 </div><div class="main">
-<div class="grid"><div class="panel" id="overview"><h2>Agent Network</h2><div id="network" style="position:relative;height:400px;border:1px solid #1e3a5f;border-radius:8px;overflow:hidden"></div><p class="small">Nodes are your real registered agents. Lines connect a task's submitter to its assigned worker. No agent is invented — an empty mesh means an empty network.</p></div>
-<div class="panel"><h2>Agent Status</h2><div id="donut" style="text-align:center"></div><div id="donutlegend" class="small"></div><p class="small">Online = heartbeat in the last 10 minutes. Busy = has a running task. Idle = registered, no running task. Offline = heartbeat older than 10 minutes or never.</p></div></div>
-<div class="grid"><div class="panel"><h2>Agent Load — tasks per agent (real counts)</h2><div id="load"></div></div>
-<div class="panel"><h2>Mesh Health</h2><div id="meshhealth" class="small"></div></div></div>
-<div class="panel" id="tasks"><h2>Active Tasks</h2><div id="tasklist" class="small">Refresh to load.</div></div>
-<div class="grid"><div class="panel" id="comms"><h2>Comms Feed — Live</h2><div id="feed" class="small"></div></div>
-<div class="panel"><h2>Control — Register / Submit / Execute</h2>
-<button onclick="seedAgents()">Seed CreoX Agents — mere saare projects</button><div id="seedresult" class="small" style="margin-bottom:12px"></div>
+<div class="grid"><div class="panel" id="overview"><h2>Agent Network</h2><div id="network" style="position:relative;height:400px;border:1px solid #1e3a5f;border-radius:8px;overflow:hidden"></div><p class="small">Owner: Master Creox. Nodes are your real registered agents — seed them from the Control panel below. Lines connect a task's submitter to its assigned worker. Empty mesh = empty network, no invented agents.</p></div>
+<div class="panel"><h2>System Resources</h2><div class="gauges">
+<div><div class="gauge" id="g-cpu"><b>—</b><span>CPU</span></div></div>
+<div><div class="gauge" id="g-ram"><b>—</b><span>RAM</span></div></div>
+<div><div class="gauge" id="g-disk"><b>—</b><span>DISK</span></div></div>
+</div><p class="small" id="sysdetail">Loading system data...</p><p class="small">CPU/RAM need psutil (in requirements.txt). Disk is measured with the standard library. No fake percentages — if a value is unavailable it shows —, not a made-up number.</p></div></div>
+<div class="svc" id="services"></div>
+<div class="grid" style="margin-top:14px"><div class="panel"><h2>Agent Load — tasks per agent (real counts)</h2><div id="load"></div><p class="small">This panel replaces "Context Fuel" on purpose: mesh demo agents have no LLM context tokens, so a token-fuel % would be fake. These bars are real task counts per agent.</p></div>
+<div class="panel"><h2>Agent Status</h2><div id="donut" style="text-align:center"></div><div id="donutlegend" class="small"></div><p class="small">Online = heartbeat in the last 10 minutes. Busy = has a running task. Offline = heartbeat older than 10 minutes or never.</p></div></div>
+<div class="grid"><div class="panel" id="tasks"><h2>Active Tasks</h2><div id="tasklist" class="small">Refresh to load.</div></div>
+<div class="panel" id="comms"><h2>Comms Feed — Live</h2><div id="feed" class="small"></div></div></div>
+<div class="panel"><h2>Control — Seed / Register / Submit / Execute</h2>
+<button onclick="seedAgents()">Seed CreoX Agents — mere saare projects + Muse</button><div id="seedresult" class="small" style="margin-bottom:12px"></div>
 <label>Agent name</label><input type="text" id="aname" placeholder="e.g. EchoAgent">
 <label>Capabilities, permissions (comma separated)</label><input type="text" id="acaps" placeholder="echo">
 <button onclick="regAgent()">Register agent</button><div id="newagent"></div>
@@ -53,12 +75,13 @@ table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #1e3a5f;
 <button onclick="subTask()">Submit task</button><div id="newtask" class="small"></div>
 <label style="display:block;margin-top:12px">Execute: task ID + worker agent ID + token</label><input type="text" id="exid" placeholder="Task ID"><input type="text" id="exaid" placeholder="Worker agent ID"><input type="password" id="extoken" placeholder="agm_...">
 <button onclick="execTask()">Execute</button><button class="secondary" onclick="recover()">Recover stale tasks</button><div id="exresult" class="small" style="margin-top:8px"></div>
-<p class="small warn">Token is shown only once. Copy it now — it will never be shown again.</p></div></div>
+<p class="small warn">Token is shown only once. Copy it now — it will never be shown again.</p></div>
 <div class="panel" id="audit"><h2>Audit Log — Full</h2><div id="auditlog" class="small">Refresh to load.</div></div>
+<div class="panel" id="meshhealth"><h2>Mesh Health</h2><div id="healthdetail" class="small"></div></div>
 </div></div>
 <script>
 function esc(s){ return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
-var AGENTS=[], TASKS=[], AUDIT=[];
+var AGENTS=[], TASKS=[], AUDIT=[], SYS={};
 function hbMs(h){ if(!h) return 0; var t = Date.parse(h.replace("Z","+00:00")); return isNaN(t) ? 0 : t; }
 function agentStatus(a){
   var running = TASKS.some(function(t){ return t.assigned_agent_id === a.id && t.status === "running"; });
@@ -67,8 +90,14 @@ function agentStatus(a){
   if(a.last_heartbeat && age < 10*60*1000) return "Online";
   return "Offline";
 }
-function loadAll(){ Promise.all([fetch("/agents").then(function(r){ return r.json(); }), fetch("/tasks").then(function(r){ return r.json(); }), fetch("/audit").then(function(r){ return r.json(); }), fetch("/health").then(function(r){ return r.json(); })]).then(function(all){
-  AGENTS = all[0].agents || []; TASKS = all[1].tasks || []; AUDIT = all[2].audit || [];
+function gauge(id, pct, color){
+  var el = document.getElementById(id);
+  if(pct == null){ el.style.background = "#0a1526"; el.innerHTML = "<b>—</b><span>" + el.querySelector("span").textContent + "</span>"; return; }
+  el.style.background = "conic-gradient(" + color + " 0 " + (pct*3.6) + "deg, #071426 " + (pct*3.6) + "deg 360deg)";
+  el.innerHTML = "<b style='background:#0a1526;border-radius:50%;padding:12px 8px'>" + pct + "%</b><span>" + el.querySelector("span").textContent + "</span>";
+}
+function loadAll(){ Promise.all([fetch("/agents").then(function(r){ return r.json(); }), fetch("/tasks").then(function(r){ return r.json(); }), fetch("/audit").then(function(r){ return r.json(); }), fetch("/health").then(function(r){ return r.json(); }), fetch("/system").then(function(r){ return r.json(); }).catch(function(){ return {}; })]).then(function(all){
+  AGENTS = all[0].agents || []; TASKS = all[1].tasks || []; AUDIT = all[2].audit || []; SYS = all[4] || {};
   document.getElementById("st-version").textContent = "Version " + (all[3].version || "");
   render();
 }).catch(function(){}); }
@@ -76,13 +105,26 @@ function render(){
   var online = AGENTS.filter(function(a){ return agentStatus(a) === "Online" || agentStatus(a) === "Busy"; }).length;
   var active = TASKS.filter(function(t){ return t.status === "pending" || t.status === "running"; }).length;
   var done = TASKS.filter(function(t){ return t.status === "done"; }).length;
+  var dead = TASKS.filter(function(t){ return t.status === "dead_letter"; }).length;
+  var failed = TASKS.filter(function(t){ return t.status === "failed"; }).length;
   document.getElementById("st-agents").textContent = AGENTS.length;
   document.getElementById("st-online").textContent = online;
+  document.getElementById("st-online-pct").textContent = AGENTS.length ? Math.round(online/AGENTS.length*100) + "%" : "";
   document.getElementById("st-active").textContent = active;
   document.getElementById("st-done").textContent = done;
   document.getElementById("st-msgs").textContent = AUDIT.length;
+  document.getElementById("sb-agents").textContent = AGENTS.length;
+  document.getElementById("sb-tasks").textContent = TASKS.length;
+  document.getElementById("sb-comms").textContent = AUDIT.length;
+  document.getElementById("sb-kanban").textContent = TASKS.length;
+  document.getElementById("sb-esc").textContent = dead + failed;
+  document.getElementById("sb-inc").textContent = dead;
+  if(SYS.uptime_seconds != null){ var u = SYS.uptime_seconds; var d = Math.floor(u/86400), h = Math.floor(u%86400/3600), m = Math.floor(u%3600/60); document.getElementById("st-uptime").textContent = "Uptime " + d + "d " + h + "h " + m + "m"; }
+  gauge("g-cpu", SYS.cpu_percent, "#22d3ee"); gauge("g-ram", SYS.ram_percent, "#a855f7"); gauge("g-disk", SYS.disk_percent, "#2dd4bf");
+  document.getElementById("sysdetail").innerHTML = "CPU cores: <b>" + (SYS.cpu_count || "—") + "</b> · Disk: <b>" + (SYS.disk_total_gb != null ? SYS.disk_total_gb + " GB" : "—") + "</b> · Server uptime is this dashboard server's real uptime, not a sample value.";
+  document.getElementById("services").innerHTML = [["AgentMesh API","/health"],["Agents","/agents"],["Tasks","/tasks"],["Audit","/audit"],["Dashboard","/"],["API Docs","/docs"]].map(function(s){ return "<div><span class='dot' style='background:#34d399'></span><b>" + s[0] + "</b><br><span class='small'>Online</span></div>"; }).join("");
   var net = document.getElementById("network");
-  if(!AGENTS.length){ net.innerHTML = "<p class='small' style='padding:20px'>No agents registered yet — register your first agent in the Control panel.</p>"; }
+  if(!AGENTS.length){ net.innerHTML = "<p class='small' style='padding:20px'>No agents registered yet — click Seed CreoX Agents in the Control panel.</p>"; }
   else {
     var html = "<svg width='100%' height='400' style='position:absolute;left:0;top:0'>";
     var pos = {};
@@ -102,12 +144,14 @@ function render(){
   TASKS.forEach(function(t){ if(t.assigned_agent_id && per[t.assigned_agent_id] != null) per[t.assigned_agent_id]++; });
   var mx = Math.max(1, Math.max.apply(null, Object.keys(per).map(function(k){ return per[k]; })));
   document.getElementById("load").innerHTML = AGENTS.length ? AGENTS.map(function(a){ var n = per[a.id]; return esc(a.name) + " — " + n + " tasks<div class='bar'><i style='width:" + (n/mx*100) + "%'></i></div>"; }).join("") : "<span class='small'>No agents yet.</span>";
-  var dead = TASKS.filter(function(t){ return t.status === "dead_letter"; }).length;
-  var failed = TASKS.filter(function(t){ return t.status === "failed"; }).length;
-  document.getElementById("meshhealth").innerHTML = "Total tasks: <b>" + TASKS.length + "</b><br>Done: <b>" + done + "</b> · Failed: <b>" + failed + "</b> · Dead-letter: <b>" + dead + "</b><br>Audit entries: <b>" + AUDIT.length + "</b><br>Unassigned tasks: <b>" + TASKS.filter(function(t){ return t.status === "unassigned"; }).length + "</b>";
-  var rows = TASKS.map(function(t){ return "<tr><td>" + t.id + "</td><td>" + esc(t.task_type) + "</td><td>" + esc((AGENTS.filter(function(a){ return a.id === t.assigned_agent_id; })[0] || {}).name || "-") + "</td><td>" + t.status + "</td><td>" + esc(JSON.stringify(t.result || "")) + "</td></tr>"; }).join("") || "<tr><td colspan='5'>No tasks yet.</td></tr>";
-  document.getElementById("tasklist").innerHTML = "<table><tr><th>ID</th><th>Task</th><th>Agent</th><th>Status</th><th>Result</th></tr>" + rows + "</table>";
-  var feed = AUDIT.slice(0, 12).map(function(a){ return "<div style='border-bottom:1px solid #1e3a5f;padding:8px 0'><b>" + esc(a.actor) + "</b> → " + esc(a.action) + (a.task_id != null ? " (task " + a.task_id + ")" : "") + "<br><span class='small'>" + esc(a.detail || "") + " · " + esc(a.created_at) + "</span></div>"; }).join("") || "<span class='small'>No messages yet.</span>";
+  document.getElementById("healthdetail").innerHTML = "Total tasks: <b>" + TASKS.length + "</b> · Done: <b>" + done + "</b> · Failed: <b>" + failed + "</b> · Dead-letter: <b>" + dead + "</b> · Audit entries: <b>" + AUDIT.length + "</b> · Unassigned: <b>" + TASKS.filter(function(t){ return t.status === "unassigned"; }).length + "</b>";
+  filterAll();
+}
+function filterAll(){
+  var q = (document.getElementById("q").value || "").toLowerCase();
+  var rows = TASKS.filter(function(t){ return !q || JSON.stringify(t).toLowerCase().indexOf(q) >= 0 || (AGENTS.filter(function(a){ return a.id === t.assigned_agent_id; })[0] || {}).name.toLowerCase().indexOf(q) >= 0; }).map(function(t){ var pill = t.status === "done" ? "done" : (t.status === "running" ? "run" : (t.status === "pending" ? "q" : "")); return "<tr><td>" + t.id + "</td><td>" + esc(t.task_type) + "</td><td>" + esc((AGENTS.filter(function(a){ return a.id === t.assigned_agent_id; })[0] || {}).name || "-") + "</td><td><span class='pill " + pill + "'>" + t.status + "</span></td><td>" + esc(JSON.stringify(t.result || "")) + "</td></tr>"; }).join("") || "<tr><td colspan='5'>No tasks yet.</td></tr>";
+  document.getElementById("tasklist").innerHTML = "<table><tr><th>#</th><th>Task</th><th>Agent</th><th>Status</th><th>Result</th></tr>" + rows + "</table>";
+  var feed = AUDIT.filter(function(a){ return !q || JSON.stringify(a).toLowerCase().indexOf(q) >= 0; }).slice(0, 12).map(function(a){ return "<div style='border-bottom:1px solid #1e3a5f;padding:8px 0'><b>" + esc(a.actor) + "</b> → " + esc(a.action) + (a.task_id != null ? " (task " + a.task_id + ")" : "") + "<br><span class='small'>" + esc(a.detail || "") + " · " + esc(a.created_at) + "</span></div>"; }).join("") || "<span class='small'>No messages yet.</span>";
   document.getElementById("feed").innerHTML = feed;
   var arows = AUDIT.map(function(a){ return "<tr><td>" + esc(a.created_at) + "</td><td>" + esc(a.actor) + "</td><td>" + esc(a.action) + "</td><td>" + (a.task_id == null ? "" : a.task_id) + "</td><td>" + esc(a.detail || "") + "</td></tr>"; }).join("") || "<tr><td colspan='5'>No audit entries yet.</td></tr>";
   document.getElementById("auditlog").innerHTML = "<table><tr><th>Time</th><th>Actor</th><th>Action</th><th>Task</th><th>Detail</th></tr>" + arows + "</table>";
@@ -118,7 +162,7 @@ function seedAgents(){
   fetch("/agents/seed", {method: "POST"}).then(function(r){ return r.json(); }).then(function(d){
     var html = "";
     (d.seeded || []).forEach(function(a){ saveToken(a.id, a.token); html += "<p><b>" + esc(a.name) + "</b> (ID " + a.id + ", " + esc(a.domain) + ")</p><div class='mono'>" + esc(a.token) + "</div>"; });
-    if(!(d.seeded || []).length) html = "<span class='small'>Sab agents pehle se seeded hain — token sirf pehli baar dikha tha. Dobara seed karne se duplicate nahi bante.</span>";
+    if(!(d.seeded || []).length) html = "<span class='small'>Sab agents pehle se seeded hain — token sirf pehli baar dikha tha.</span>";
     else html = "<span class='warn'>Tokens sirf ek baar dikh rahe hain — copy kar lo, ye browser me save ho gaye hain.</span>" + html;
     document.getElementById("seedresult").innerHTML = html;
     loadAll();

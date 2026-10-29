@@ -49,6 +49,38 @@ def create_app(mesh: Mesh | None = None) -> FastAPI:
         return {"status": "ok", "service": "Creox AgentMesh",
                 "version": VERSION}
 
+    @app.get("/system")
+    def system():
+        """Real host resources for the System Resources panel.
+
+        CPU/RAM come from psutil when installed; disk from the stdlib.
+        Missing values are returned as null — never faked.
+        """
+        import os
+        import shutil
+        import time
+
+        out = {"cpu_percent": None, "ram_percent": None,
+               "cpu_count": os.cpu_count(), "uptime_seconds": None}
+        try:
+            import psutil
+            out["cpu_percent"] = round(psutil.cpu_percent(interval=0.1))
+            out["ram_percent"] = round(psutil.virtual_memory().percent)
+        except Exception:
+            pass
+        try:
+            total, used, _free = shutil.disk_usage(os.getcwd())
+            out["disk_percent"] = round(used / total * 100) if total else None
+            out["disk_total_gb"] = round(total / (1024 ** 3), 1)
+        except Exception:
+            out["disk_percent"] = None
+        started = getattr(app.state, "started_at", None)
+        if started is None:
+            started = time.time()
+            app.state.started_at = started
+        out["uptime_seconds"] = int(time.time() - started)
+        return out
+
     @app.get("/", response_class=HTMLResponse)
     def dashboard():
         return DASHBOARD_HTML

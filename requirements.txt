@@ -1,2 +1,3 @@
 fastapi>=0.110
 uvicorn>=0.29
+psutil>=5.9  # System Resources panel (CPU/RAM); dashboard works without it, showing — instead
