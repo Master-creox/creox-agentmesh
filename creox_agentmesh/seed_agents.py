@@ -13,6 +13,12 @@ Deliberately NOT seeded:
 - Space Debris Cleanup — a standalone plan, not a software agent.
 - Jarvis — design only so far, no repo/code to seed as an agent.
 - BabyCoach Android apps — Android apps, not mesh agents.
+
+Muse is included as a PLACEHOLDER agent only: Muse runs in chat,
+not on the laptop, and cannot reach this local-only mesh, so it
+cannot heartbeat or execute tasks itself. Its mesh entry exists so
+the network shows the full team, with the bridge status stated
+plainly — live bridge is Phase 2, via Akash in chat.
 """
 from __future__ import annotations
 
@@ -30,4 +36,5 @@ SEED_AGENTS = [
     ("Creox Aegis Defense", "log_analyze", "defensive security"),
     ("Ethical Hacking Practice Lab", "echo", "practice coach"),
     ("Obdsss", "log_analyze", "PHP scanner"),
+    ("Muse", "echo", "assistant — placeholder, live bridge pending"),
 ]

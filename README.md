@@ -36,9 +36,12 @@ It registers 12 of your real projects as agents (Baby Angel,
 Aegis Prime, SentinelAI, ScamShield Global, Master CreoX API,
 Advanced + Basic Network Sniffer, CicadaLab 3301, AI Cyber Account
 Lab, Creox Aegis Defense, Ethical Hacking Practice Lab, Obdsss),
-each with the demo task it can actually run (echo / log_analyze /
-calc). Tokens are shown only once at seeding and saved in the
-browser for submit/execute. Re-seeding never duplicates.
+plus Muse as a placeholder agent (assistant — live bridge pending;
+Muse runs in chat, not on the laptop, so it cannot heartbeat or
+execute mesh tasks itself yet), each with the demo task it can
+actually run (echo / log_analyze / calc). Tokens are shown only
+once at seeding and saved in the browser for submit/execute.
+Re-seeding never duplicates.
 Not seeded by design: BAOS (solo), CodeMentor-AI + codealpha_tasks
 (parked), profile repo, SDC plan, Jarvis (design only), BabyCoach
 apps. This is mesh registration + routing — live integration of

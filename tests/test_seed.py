@@ -15,6 +15,7 @@ class TestSeed(unittest.TestCase):
         names = [a["name"] for a in m.list_agents()]
         self.assertIn("Baby Angel", names)
         self.assertIn("SentinelAI", names)
+        self.assertIn("Muse", names)
         self.assertNotIn("BAOS", names)
         second = m.seed_creox_agents()
         self.assertEqual(len(second["seeded"]), 0)
