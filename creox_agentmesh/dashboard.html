@@ -30,7 +30,7 @@ table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #1e3a5f;
 .gauge{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto}
 .gauge b{font-size:16px}.gauge span{font-size:10px;color:#94a3b8}
 .svc{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}@media(max-width:1000px){.svc{grid-template-columns:repeat(3,1fr)}}
-.svc div{background:#0a1526;border:1px solid #1e3a5f;border-radius:8px;padding:12px;font-size:13px}
+.svc div,.svc a{background:#0a1526;border:1px solid #1e3a5f;border-radius:8px;padding:12px;font-size:13px;display:block}
 .pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:#164e63;color:#fff}
 .pill.run{background:#166534}.pill.rev{background:#1e40af}.pill.q{background:#334155}.pill.done{background:#14532d}
 </style></head><body>
@@ -47,14 +47,14 @@ table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #1e3a5f;
 <a href="#agents">Agents <b id="sb-agents">—</b></a>
 <a href="#tasks">Tasks <b id="sb-tasks">—</b></a>
 <a href="#comms">Comm <b id="sb-comms">—</b></a>
-<a href="#tasks">Kanban <b id="sb-kanban">—</b></a>
-<a href="#tasks">Escalations <b id="sb-esc">—</b></a>
-<a href="#tasks">Incidents <b id="sb-inc">—</b></a>
-<a href="#audit">Activity</a><a href="#overview">State</a><a href="#meshhealth">Metrics</a><a href="#audit">Logs</a>
+<a href="#kanban">Kanban <b id="sb-kanban">—</b></a>
+<a href="#escalations">Escalations <b id="sb-esc">—</b></a>
+<a href="#incidents">Incidents <b id="sb-inc">—</b></a>
+<a href="#audit">Activity</a><a href="#meshhealth">State</a><a href="#system">Metrics</a><a href="#audit">Logs</a>
 <div class="small" style="margin-top:20px">SYSTEM STATUS<br><span class="ok">● All Systems Online</span><br><span id="st-uptime">Uptime —</span><br><span id="st-version">Version —</span><br>Local mesh only — never internet-facing.</div>
 </div><div class="main">
 <div class="grid"><div class="panel" id="overview"><h2>Agent Network</h2><div id="network" style="position:relative;height:400px;border:1px solid #1e3a5f;border-radius:8px;overflow:hidden"></div><p class="small">Owner: Master Creox. Nodes are your real registered agents — seed them from the Control panel below. Lines connect a task's submitter to its assigned worker. Empty mesh = empty network, no invented agents.</p></div>
-<div class="panel"><h2>System Resources</h2><div class="gauges">
+<div class="panel" id="system"><h2>System Resources</h2><div class="gauges">
 <div><div class="gauge" id="g-cpu"><b>—</b><span>CPU</span></div></div>
 <div><div class="gauge" id="g-ram"><b>—</b><span>RAM</span></div></div>
 <div><div class="gauge" id="g-disk"><b>—</b><span>DISK</span></div></div>
@@ -64,6 +64,10 @@ table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #1e3a5f;
 <div class="panel"><h2>Agent Status</h2><div id="donut" style="text-align:center"></div><div id="donutlegend" class="small"></div><p class="small">Online = heartbeat in the last 10 minutes. Busy = has a running task. Offline = heartbeat older than 10 minutes or never.</p></div></div>
 <div class="grid"><div class="panel" id="tasks"><h2>Active Tasks</h2><div id="tasklist" class="small">Refresh to load.</div></div>
 <div class="panel" id="comms"><h2>Comms Feed — Live</h2><div id="feed" class="small"></div></div></div>
+<div class="panel" id="agents"><h2>Agents</h2><div id="agentlist" class="small">Refresh to load.</div></div>
+<div class="panel" id="kanban"><h2>Kanban — tasks by status</h2><div id="kanbanboard" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div></div>
+<div class="grid"><div class="panel" id="escalations"><h2>Escalations — failed + dead-letter tasks</h2><div id="esclist" class="small"></div></div>
+<div class="panel" id="incidents"><h2>Incidents — dead-letter tasks</h2><div id="inclist" class="small"></div></div></div>
 <div class="panel"><h2>Control — Seed / Register / Submit / Execute</h2>
 <button onclick="seedAgents()">Seed CreoX Agents — mere saare projects + Muse</button><div id="seedresult" class="small" style="margin-bottom:12px"></div>
 <label>Agent name</label><input type="text" id="aname" placeholder="e.g. EchoAgent">
@@ -122,7 +126,14 @@ function render(){
   if(SYS.uptime_seconds != null){ var u = SYS.uptime_seconds; var d = Math.floor(u/86400), h = Math.floor(u%86400/3600), m = Math.floor(u%3600/60); document.getElementById("st-uptime").textContent = "Uptime " + d + "d " + h + "h " + m + "m"; }
   gauge("g-cpu", SYS.cpu_percent, "#22d3ee"); gauge("g-ram", SYS.ram_percent, "#a855f7"); gauge("g-disk", SYS.disk_percent, "#2dd4bf");
   document.getElementById("sysdetail").innerHTML = "CPU cores: <b>" + (SYS.cpu_count || "—") + "</b> · Disk: <b>" + (SYS.disk_total_gb != null ? SYS.disk_total_gb + " GB" : "—") + "</b> · Server uptime is this dashboard server's real uptime, not a sample value.";
-  document.getElementById("services").innerHTML = [["AgentMesh API","/health"],["Agents","/agents"],["Tasks","/tasks"],["Audit","/audit"],["Dashboard","/"],["API Docs","/docs"]].map(function(s){ return "<div><span class='dot' style='background:#34d399'></span><b>" + s[0] + "</b><br><span class='small'>Online</span></div>"; }).join("");
+  document.getElementById("services").innerHTML = [["AgentMesh API","/health"],["Agents","/agents"],["Tasks","/tasks"],["Audit","/audit"],["Dashboard","/"],["API Docs","/docs"]].map(function(s){ return "<a href='" + s[1] + "' target='_blank' style='text-decoration:none;color:#dbeafe'><span class='dot' style='background:#34d399'></span><b>" + s[0] + "</b><br><span class='small'>Online — click to open</span></a>"; }).join("");
+  document.getElementById("agentlist").innerHTML = "<table><tr><th>ID</th><th>Name</th><th>Capability</th><th>Status</th><th>Last heartbeat</th></tr>" + (AGENTS.map(function(a){ return "<tr><td>" + a.id + "</td><td>" + esc(a.name) + "</td><td>" + esc(a.capabilities.join(", ")) + "</td><td>" + agentStatus(a) + "</td><td>" + esc(a.last_heartbeat || "never") + "</td></tr>"; }).join("") || "<tr><td colspan='5'>No agents yet — seed or register one.</td></tr>") + "</table>";
+  var cols = ["pending", "running", "done", "failed"];
+  document.getElementById("kanbanboard").innerHTML = cols.map(function(st){ var cards = TASKS.filter(function(t){ return t.status === st; }).map(function(t){ return "<div style='background:#071426;border:1px solid #1e3a5f;border-radius:6px;padding:8px;margin-bottom:8px;font-size:12px'>#" + t.id + " " + esc(t.task_type) + "<br><span class='small'>" + esc((AGENTS.filter(function(a){ return a.id === t.assigned_agent_id; })[0] || {}).name || "-") + "</span></div>"; }).join("") || "<span class='small'>Empty</span>"; return "<div><b>" + st + "</b><br><br>" + cards + "</div>"; }).join("");
+  var esc_tasks = TASKS.filter(function(t){ return t.status === "failed" || t.status === "dead_letter"; });
+  document.getElementById("esclist").innerHTML = esc_tasks.length ? esc_tasks.map(function(t){ return "#" + t.id + " " + esc(t.task_type) + " — " + t.status + "<br>"; }).join("") : "<span class='small'>No escalations. Good — no failed or dead-letter tasks.</span>";
+  var inc_tasks = TASKS.filter(function(t){ return t.status === "dead_letter"; });
+  document.getElementById("inclist").innerHTML = inc_tasks.length ? inc_tasks.map(function(t){ return "#" + t.id + " " + esc(t.task_type) + " — dead-letter after 3 attempts<br>"; }).join("") : "<span class='small'>No incidents. No task has hit dead-letter.</span>";
   var net = document.getElementById("network");
   if(!AGENTS.length){ net.innerHTML = "<p class='small' style='padding:20px'>No agents registered yet — click Seed CreoX Agents in the Control panel.</p>"; }
   else {
@@ -192,5 +203,6 @@ function execTask(){
   });
 }
 function recover(){ fetch("/tasks/recover", {method: "POST"}).then(function(r){ return r.json(); }).then(function(d){ document.getElementById("exresult").innerHTML = "Recovered tasks: " + (d.recovered || []).length; loadAll(); }); }
+document.querySelectorAll(".side a").forEach(function(a){ a.addEventListener("click", function(){ document.querySelectorAll(".side a").forEach(function(x){ x.classList.remove("on"); }); a.classList.add("on"); }); });
 loadAll();
 </script></body></html>
