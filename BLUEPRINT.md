@@ -56,12 +56,18 @@ Reason: v1 must be testable on his laptop with the tools he
 already runs (Python 3.14, `python -m pip`). A Rust worker in v1
 would add a second toolchain before the mesh itself is proven.
 
+## Correction locked (2026-10-29, Akash: "isse dashboard mai bnana tha")
+Dashboard was wrongly listed out of scope. Dashboard IS part of
+AgentMesh: FastAPI serves an HTML dashboard at `/` (agents table,
+tasks table, audit log, register/submit/execute/recover forms,
+live status strip), same professional dark style as the other
+CreoX dashboards, no emojis.
+
 ## Out of scope for v1
 - Real LLM agents, internet-facing mesh, cross-machine mesh.
 - BAOS agents or BAOS integration of any kind.
 - Automatic actions on the host system (files, network, accounts).
-- Recurring scheduler, web dashboard (FastAPI API first, like
-  Aegis Phase 3 came after its core).
+- Recurring scheduler.
 
 ## v1 success test (on HIS laptop only, guide-only)
 1. Register 3 demo agents.

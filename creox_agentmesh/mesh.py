@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 
 from .demo_agents import DEMO_AGENTS
+from .seed_agents import SEED_AGENTS
 
 MAX_ATTEMPTS = 3
 
@@ -89,6 +90,26 @@ class Mesh:
                 "token": token,
                 "note": "Store this token now — it is shown only once."}
 
+    def seed_creox_agents(self) -> dict:
+        """Register Akash's real projects as mesh agents, once.
+
+        Already-seeded agents are returned without a token (tokens are
+        shown only once, at first seeding). Re-running never duplicates.
+        """
+        existing = {a["name"] for a in self.list_agents()}
+        seeded, already = [], []
+        for name, task_type, domain in SEED_AGENTS:
+            if name in existing:
+                already.append({"name": name, "task_type": task_type,
+                                "domain": domain, "token": None})
+                continue
+            reg = self.register_agent(name, [task_type], [task_type])
+            seeded.append({"id": reg["id"], "name": name,
+                           "task_type": task_type, "domain": domain,
+                           "token": reg["token"]})
+        return {"seeded": seeded, "already_seeded": already,
+                "total_agents": len(self.list_agents())}
+
     def list_agents(self) -> list[dict]:
         rows = self.conn.execute(
             "SELECT id, name, capabilities, permissions, last_heartbeat,"
@@ -147,6 +168,17 @@ class Mesh:
         self._audit(f"agent:{agent_id}", "task_submitted", cur.lastrowid,
                     f"type={task_type} assigned={assigned}")
         return self.get_task(cur.lastrowid)
+
+    def list_tasks(self) -> list[dict]:
+        rows = self.conn.execute(
+            "SELECT * FROM tasks ORDER BY id").fetchall()
+        out = []
+        for row in rows:
+            d = dict(row)
+            d["payload"] = json.loads(d["payload"])
+            d["result"] = json.loads(d["result"]) if d["result"] else None
+            out.append(d)
+        return out
 
     def get_task(self, task_id: int) -> dict:
         row = self.conn.execute(
