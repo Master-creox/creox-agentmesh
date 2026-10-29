@@ -197,7 +197,10 @@ function subTask(){
 }
 function execTask(){
   var id = document.getElementById("exid").value.trim();
-  fetch("/tasks/" + id + "/execute", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({agent_id: parseInt(document.getElementById("exaid").value), token: document.getElementById("extoken").value || savedToken(document.getElementById("exaid").value))})}).then(function(r){ return r.json(); }).then(function(d){
+  var workerId = document.getElementById("exaid").value;
+  var workerToken = document.getElementById("extoken").value || savedToken(workerId);
+  var body = JSON.stringify({agent_id: parseInt(workerId), token: workerToken});
+  fetch("/tasks/" + id + "/execute", {method: "POST", headers: {"Content-Type": "application/json"}, body: body}).then(function(r){ return r.json(); }).then(function(d){
     document.getElementById("exresult").innerHTML = d.status ? "Status: <b>" + esc(d.status) + "</b><br>Result: " + esc(JSON.stringify(d.result)) : "<span class='bad'>" + esc(d.detail || "Failed") + "</span>";
     loadAll();
   });
